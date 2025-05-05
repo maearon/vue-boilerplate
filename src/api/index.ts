@@ -55,7 +55,7 @@ const API = axios.create({
 });
 
 API.interceptors.request.use(
-  function (config: AxiosRequestConfig) {
+  function (config: any) {
     if (
       localStorage.getItem('token') && localStorage.getItem('token') !== 'undefined'
     ) 

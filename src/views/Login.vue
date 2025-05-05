@@ -64,7 +64,7 @@
   
   const email = ref('')
   const password = ref('')
-  const rememberMe = ref(false)
+  const rememberMe = ref(true)
   const loading = ref(false)
   const error = ref('')
   const emailError = ref('')
@@ -91,14 +91,14 @@
         }
       })
       
-      const { token, remember_token } = response
+      const { token, remember_token } = response.tokens.access
       
       if (rememberMe.value) {
         localStorage.setItem('token', token)
-        localStorage.setItem('remember_token', remember_token)
+        localStorage.setItem('remember_token', token)
       } else {
         sessionStorage.setItem('token', token)
-        sessionStorage.setItem('remember_token', remember_token)
+        sessionStorage.setItem('remember_token', token)
       }
       
       await sessionStore.fetchUser()

@@ -31,7 +31,7 @@ export interface RemoveResponse {
 
 const micropostApi = {
   getAll(params: { page: number }): Promise<ListResponse<Micropost>> {
-    return api.get("/microposts", { params }).then((response) => response)
+    return api.get("", { params }).then((response) => response)
   },
 
   create(data: FormData): Promise<CreateResponse> {
