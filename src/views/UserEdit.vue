@@ -13,7 +13,7 @@
             <v-card-text>
               <div class="d-flex flex-column align-center">
                 <v-avatar size="80" class="mb-3">
-                  <v-img :src="`https://secure.gravatar.com/avatar/${gravatar}?s=80`" :alt="user.name" />
+                  <v-img :src="`${gravatar}`" :alt="user.name" />
                 </v-avatar>
                 <h3 class="text-h5">{{ user.name }}</h3>
                 <p class="text-body-2 mt-2">
@@ -155,11 +155,22 @@ const handleSubmit = async () => {
   submitting.value = true
   errors.value = []
   try {
+    // Gọi API update user
     const response = await userApi.update(userId, formData.value)
-    if (response.flash_success) {
-      toast.success(response.flash_success[1])
-      router.push(`/users/${userId}`)
+
+    if (response.flash) {
+      // Nếu có thông báo thành công
+      toast.success(response.flash[1])
+      
+      // Cập nhật avatar nếu có avatar từ hệ thống uploadThing
+      // if (response.avatarUrl) {
+      //   gravatar.value = response.avatarUrl
+      // }
+      
+      // Điều hướng về trang profile của user
+      // router.push(`/users/${userId}`)
     }
+
     if (response.error) {
       errors.value = Array.isArray(response.error) ? response.error : [response.error]
     }
@@ -181,4 +192,5 @@ const handleSubmit = async () => {
     submitting.value = false
   }
 }
+
 </script>
