@@ -22,7 +22,7 @@ export const useSessionStore = defineStore(
       try {
         status.value = "loading"
         const response = await api.get("/sessions")
-        user.value = response.data.user
+        user.value = response.user
         loggedIn.value = true
         status.value = "idle"
         error.value = ""

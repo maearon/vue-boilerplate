@@ -31,15 +31,15 @@ export interface RemoveResponse {
 
 const micropostApi = {
   getAll(params: { page: number }): Promise<ListResponse<Micropost>> {
-    return api.get("/microposts", { params }).then((response) => response.data)
+    return api.get("/microposts", { params }).then((response) => response)
   },
 
   create(data: FormData): Promise<CreateResponse> {
-    return api.post("/microposts", data).then((response) => response.data)
+    return api.post("/microposts", data).then((response) => response)
   },
 
   remove(id: number): Promise<RemoveResponse> {
-    return api.delete(`/microposts/${id}`).then((response) => response.data)
+    return api.delete(`/microposts/${id}`).then((response) => response)
   },
 }
 

@@ -169,8 +169,8 @@
     try {
       loading.value = true
       const response = await api.get(`/users/${userId.value}`)
-      user.value = response.data.user
-      isFollowing.value = response.data.following
+      user.value = response.user
+      isFollowing.value = response.following
       await fetchUserMicroposts()
     } catch (err) {
       error.value = 'Failed to load user profile'
@@ -184,8 +184,8 @@
       const response = await api.get(`/users/${userId.value}/microposts`, {
         params: { page: page.value }
       })
-      microposts.value = response.data.microposts
-      totalCount.value = response.data.total_count
+      microposts.value = response.microposts
+      totalCount.value = response.total_count
     } catch (err) {
       toast.error('Failed to load microposts')
     }

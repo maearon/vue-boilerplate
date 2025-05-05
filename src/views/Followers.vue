@@ -118,9 +118,9 @@
       const response = await api.get(`/users/${userId.value}/followers`, {
         params: { page: page.value }
       })
-      user.value = response.data.user
-      followers.value = response.data.followers
-      totalCount.value = response.data.total_count
+      user.value = response.user
+      followers.value = response.followers
+      totalCount.value = response.total_count
     } catch (err) {
       error.value = 'Failed to load followers'
     } finally {

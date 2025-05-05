@@ -121,7 +121,7 @@
         }
       })
       
-      const { token, remember_token } = response.data
+      const { token, remember_token } = response
       
       localStorage.setItem('token', token)
       localStorage.setItem('remember_token', remember_token)
@@ -130,8 +130,8 @@
       toast.success('Account created successfully!')
       router.push('/')
     } catch (err: any) {
-      if (err.response && err.response.data) {
-        const { error: serverError } = err.response.data
+      if (err.response && err.response) {
+        const { error: serverError } = err.response
         
         if (Array.isArray(serverError)) {
           errors.value = serverError

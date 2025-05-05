@@ -91,7 +91,7 @@
         }
       })
       
-      const { token, remember_token } = response.data
+      const { token, remember_token } = response
       
       if (rememberMe.value) {
         localStorage.setItem('token', token)
@@ -105,8 +105,8 @@
       toast.success('Logged in successfully')
       router.push('/')
     } catch (err: any) {
-      if (err.response && err.response.data) {
-        serverError = err.response.data.error; // Assign to the outer serverError
+      if (err.response && err.response) {
+        serverError = err.response.error; // Assign to the outer serverError
   
         if (typeof serverError === 'string') {
           error.value = serverError
