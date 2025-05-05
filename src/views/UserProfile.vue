@@ -137,6 +137,7 @@
   import { useSessionStore } from '../stores/session'
   import api from '../api'
   import micropostApi, { Micropost } from '../api/micropostApi'
+  import userApi, { UserShow } from '../api/userApi'
   import VueSkeleton from 'vue-loading-skeleton'
   
   const route = useRoute()
@@ -181,11 +182,14 @@
   
   const fetchUserMicroposts = async () => {
     try {
-      const response = await api.get(`/users/${userId.value}/microposts`, {
-        params: { page: page.value }
-      })
-      microposts.value = response.microposts
-      totalCount.value = response.total_count
+      const response = await userApi.show(userId.value, { page: page.value });
+      if (response.microposts) {
+        microposts.value = response.microposts
+        totalCount.value = response.total_count
+      } else {
+        microposts.value = null
+        totalCount.value = []
+      }
     } catch (err) {
       toast.error('Failed to load microposts')
     }
