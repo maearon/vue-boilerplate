@@ -1,46 +1,76 @@
-import api from "."
+// import { ListParams, ListResponse, Student } from 'models';
+import API from '.';
+import { ErrorMessageType } from '../utils/errorMessages';
+
+export interface ListParams {
+  page?: number
+  [key: string]: any
+}
+
+export interface ListResponse<Micropost> {
+  feed_items: Micropost[]
+  followers: number
+  following: number
+  gravatar: string
+  micropost: number
+  total_count: number
+}
 
 export interface Micropost {
-  id: number
+  readonly id: number
   content: string
-  user_id: number
-  user_name: string
-  gravatar_id: string
+  gravatar_id?: string
+  image: string
   size: number
-  image?: string
   timestamp: string
+  readonly user_id: string
+  user_name?: string
+  title?: string
+  description?: string
+  videoId?: string
+  channelTitle?: string
 }
 
-export interface ListResponse<T> {
-  feed_items: T[]
-  total_count: number
-  following: number
-  followers: number
-  micropost: number
-  gravatar: string
-}
+// export interface CreateParams {
+//   user: SignUpField
+// }
+
+// export interface SignUpField {
+//   name: string
+//   email: string
+//   password: string
+//   password_confirmation: string
+// }
 
 export interface CreateResponse {
-  flash?: [string, string]
-  error?: string[]
+  flash?: [message_type: string, message: string]
+  error?: ErrorMessageType
 }
 
-export interface RemoveResponse {
-  flash?: [string, string]
+export interface Response {
+  flash?: [message_type: string, message: string]
 }
 
 const micropostApi = {
-  getAll(params: { page: number }): Promise<ListResponse<Micropost>> {
-    return api.get("", { params }).then((response) => response)
+  getAll(params: ListParams): Promise<ListResponse<Micropost>> {
+    const url = '';
+    return API.get(url, { params });
   },
 
-  create(data: FormData): Promise<CreateResponse> {
-    return api.post("/microposts", data).then((response) => response)
+  // create(params: CreateParams): Promise<CreateResponse> {
+  //   const url = '/microposts';
+  //   return API.post(url,params, headers: { Content-Type:'multipart/form-data' } })
+  // },
+
+  remove(id: number): Promise<Response> {
+    const url = `/microposts/${id}`;
+    return API.delete(url);
   },
 
-  remove(id: number): Promise<RemoveResponse> {
-    return api.delete(`/microposts/${id}`).then((response) => response)
+  likeOrDislikeYoutubeVideo(videoId: string, rating: string): Promise<Response> {
+    const url = `https://www.googleapis.com/youtube/v3/videos/rate?id=${videoId}&rating=${rating}`;
+    return API.post(url);
   },
-}
+};
 
-export default micropostApi
+export default micropostApi;

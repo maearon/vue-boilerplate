@@ -114,7 +114,7 @@
                     <div class="mt-2">{{ item.content }}</div>
                     <v-img
                       v-if="item.image"
-                      :src="item.image"
+                      :src="''+item.image+''"
                       alt="Post image"
                       class="mt-2"
                       max-height="400"

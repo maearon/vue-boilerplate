@@ -1,49 +1,87 @@
 import { createRouter, createWebHistory } from "vue-router"
 import { useSessionStore } from "../stores/session"
+
+// Views
 import Home from "../views/Home.vue"
 import Login from "../views/Login.vue"
 import Signup from "../views/Signup.vue"
 import UserProfile from "../views/UserProfile.vue"
-import Following from "../views/Following.vue"
-import Followers from "../views/Followers.vue"
+import ShowFollow from "../views/ShowFollow.vue"
+import About from "../views/About.vue"
+import Contact from "../views/Contact.vue"
+import Users from "../views/Users.vue"
+import UserEdit from "../views/UserEdit.vue"
 import NotFound from "../views/NotFound.vue"
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path: "/",
-      name: "home",
+      name: "Home",
       component: Home,
     },
     {
       path: "/login",
-      name: "login",
+      name: "Login",
       component: Login,
+      meta: { guestOnly: true },
     },
     {
       path: "/signup",
-      name: "signup",
+      name: "Signup",
       component: Signup,
+      meta: { guestOnly: true },
+    },
+    {
+      path: "/users",
+      name: "Users",
+      component: Users,
     },
     {
       path: "/users/:id",
-      name: "user-profile",
+      name: "UserProfile",
       component: UserProfile,
+      props: true,
+    },
+    {
+      path: "/users/:id/edit",
+      name: "UserEdit",
+      component: UserEdit,
+      meta: { requiresAuth: true },
+      props: true,
     },
     {
       path: "/users/:id/following",
-      name: "following",
-      component: Following,
+      name: "Following",
+      component: ShowFollow,
+      props: (route) => ({
+        userId: route.params.id,
+        type: "following",
+      }),
     },
     {
       path: "/users/:id/followers",
-      name: "followers",
-      component: Followers,
+      name: "Followers",
+      component: ShowFollow,
+      props: (route) => ({
+        userId: route.params.id,
+        type: "followers",
+      }),
+    },
+    {
+      path: "/about",
+      name: "About",
+      component: About,
+    },
+    {
+      path: "/contact",
+      name: "Contact",
+      component: Contact,
     },
     {
       path: "/:pathMatch(.*)*",
-      name: "not-found",
+      name: "NotFound",
       component: NotFound,
     },
   ],
@@ -52,7 +90,6 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const sessionStore = useSessionStore()
 
-  // Nếu người dùng đã đăng nhập và cố gắng truy cập trang đăng nhập hoặc đăng ký
   if (sessionStore.loggedIn && (to.name === "login" || to.name === "signup")) {
     next({ name: "home" })
   } else {
