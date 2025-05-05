@@ -15,15 +15,19 @@
         <v-list-item v-for="user in users" :key="user.id" class="mb-2">
           <template v-slot:prepend>
             <v-avatar size="40" class="mr-3">
-              <v-img :src="`https://secure.gravatar.com/avatar/${user.gravatar_id}?s=${user.size}`" :alt="user.name" />
+              <v-img
+                :src="user.avatarUrl || `https://secure.gravatar.com/avatar/${user.gravatar_id}?s=50`"
+                :alt="user.name || user.displayName"
+                @error="onAvatarError(user.id)"
+              />
             </v-avatar>
           </template>
           
           <v-list-item-title>
-            <router-link :to="`/users/${user.id}`">{{ user.name }}</router-link>
+            <router-link :to="`/users/${user.id}`">{{ user.name || user.displayName }}</router-link>
           </v-list-item-title>
           
-          <template v-slot:append v-if="sessionStore.user && sessionStore.user.admin && sessionStore.user.id !== user.id">
+          <template v-slot:append v-if="sessionStore.user && sessionStore.user.role && sessionStore.user.id !== user.id">
             <v-btn
               color="error"
               variant="text"
@@ -51,15 +55,26 @@
 import { ref, onMounted, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useSessionStore } from '../stores/session'
-import userApi from '../api/userApi'
+import userApi, { User } from '../api/userApi'
+import { getAvatarUrl } from '@/utils/getAvatarUrl'
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  gravatar_id: string;
-  size: number;
+const imageSources = ref<Record<string, string>>({})
+
+const onAvatarError = (userId: string) => {
+  const user = users.value.find(u => u.id === userId)
+  if (user) {
+    imageSources.value[userId] = getAvatarUrl(user)
+  }
 }
+
+// interface User {
+//   id: string;
+//   name?: string;
+//   displayName: string;
+//   email: string;
+//   avatarUrl?: string;
+//   size: number;
+// }
 
 const sessionStore = useSessionStore()
 const toast = useToast()
@@ -101,17 +116,17 @@ const confirmDelete = async (userId: string, userName: string) => {
   dialog.value = true
 }
 
-const deleteUser = async () => {
-  dialog.value = false
-  try {
-    const response = await userApi.destroy(userIdToDelete.value)
-    if (response.flash) {
-      toast.success(response.flash[1])
-      fetchUsers()
-    }
-  } catch (error) {
-    console.error(error)
-    toast.error('Failed to delete user')
-  }
-}
+// const deleteUser = async () => {
+//   dialog.value = false
+//   try {
+//     const response = await userApi.destroy(userIdToDelete.value)
+//     if (response.flash) {
+//       toast.success(response.flash[1])
+//       fetchUsers()
+//     }
+//   } catch (error) {
+//     console.error(error)
+//     toast.error('Failed to delete user')
+//   }
+// }
 </script>

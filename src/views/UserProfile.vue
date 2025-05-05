@@ -14,13 +14,13 @@
               <v-card-text>
                 <div class="d-flex align-center mb-3">
                   <v-avatar size="80" class="mr-3">
-                    <v-img :src="`https://secure.gravatar.com/avatar/${user.gravatar}?s=80`" :alt="user.name" />
+                    <v-img :src="`https://secure.gravatar.com/avatar/${user.gravatar_id}?s=80`" :alt="user.name" />
                   </v-avatar>
                   <div>
                     <h3 class="text-h4">{{ user.name }}</h3>
                   </div>
                 </div>
-                <div>{{ user.micropostCount }} micropost{{ user.micropostCount !== 1 ? 's' : '' }}</div>
+                <div>{{ user.current_user_following_user }} micropost{{ totalCount !== 1 ? 's' : '' }}</div>
               </v-card-text>
             </v-card>
   
@@ -29,13 +29,13 @@
                 <div class="d-flex justify-space-around">
                   <router-link :to="`/users/${user.id}/following`" class="text-decoration-none">
                     <div class="text-center">
-                      <div class="text-h6">{{ user.followingCount }}</div>
+                      <div class="text-h6">{{ user.current_user_following_user }}</div>
                       <div>following</div>
                     </div>
                   </router-link>
                   <router-link :to="`/users/${user.id}/followers`" class="text-decoration-none">
                     <div class="text-center">
-                      <div class="text-h6">{{ user.followersCount }}</div>
+                      <div class="text-h6">{{ user.current_user_following_user }}</div>
                       <div>followers</div>
                     </div>
                   </router-link>
@@ -43,7 +43,7 @@
                 
                 <div v-if="sessionStore.user.id !== user.id" class="text-center mt-4">
                   <v-btn
-                    v-if="isFollowing"
+                    v-if="user.current_user_following_user"
                     color="error"
                     variant="outlined"
                     @click="unfollowUser"
@@ -135,8 +135,8 @@
   import { useRoute } from 'vue-router'
   import { useToast } from 'vue-toastification'
   import { useSessionStore } from '../stores/session'
-  import api from '../api'
   import micropostApi, { Micropost } from '../api/micropostApi'
+  import relationshipApi from '../api/relationshipApi'
   import userApi, { UserShow } from '../api/userApi'
   import VueSkeleton from 'vue-loading-skeleton'
   
@@ -146,49 +146,28 @@
   
   const loading = ref(true)
   const error = ref('')
-  const user = ref({
-    id: '',
-    name: '',
-    gravatar: '',
-    micropostCount: 0,
-    followingCount: 0,
-    followersCount: 0
-  })
-  const isFollowing = ref(false)
+  const user = ref<UserShow | null>(null)
   const followLoading = ref(false)
   const page = ref(1)
   const microposts = ref<Micropost[]>([])
   const totalCount = ref(0)
-  const userId = ref<string | string[]>('')
+  const userId = ref<string>('')
   
   onMounted(() => {
-    userId.value = route.params.id
-    fetchUserProfile()
+    userId.value = route.params.id as string
+    setWall()
   })
   
-  const fetchUserProfile = async () => {
-    try {
-      loading.value = true
-      const response = await api.get(`/users/${userId.value}`)
-      user.value = response.user
-      isFollowing.value = response.following
-      await fetchUserMicroposts()
-    } catch (err) {
-      error.value = 'Failed to load user profile'
-    } finally {
-      loading.value = false
-    }
-  }
-  
-  const fetchUserMicroposts = async () => {
+  const setWall = async () => {
     try {
       const response = await userApi.show(userId.value, { page: page.value });
       if (response.microposts) {
+        user.value = response.user
         microposts.value = response.microposts
         totalCount.value = response.total_count
       } else {
         microposts.value = null
-        totalCount.value = []
+        totalCount.value = undefined
       }
     } catch (err) {
       toast.error('Failed to load microposts')
@@ -201,11 +180,10 @@
   
   const followUser = async () => {
     try {
-      followLoading.value = true
-      await api.post(`/users/${userId.value}/follow`)
-      isFollowing.value = true
-      user.value.followersCount++
-      toast.success(`You are now following ${user.value.name}`)
+      const response = await relationshipApi.create({ followed_id: userId.value });
+      if (response.follow) {
+        await setWall()
+      }
     } catch (err) {
       toast.error('Failed to follow user')
     } finally {
@@ -215,11 +193,10 @@
   
   const unfollowUser = async () => {
     try {
-      followLoading.value = true
-      await api.delete(`/users/${userId.value}/unfollow`)
-      isFollowing.value = false
-      user.value.followersCount--
-      toast.success(`You have unfollowed ${user.value.name}`)
+      const response = await relationshipApi.destroy(userId.value);
+      if (response.unfollow) {
+        await setWall()
+      }
     } catch (err) {
       toast.error('Failed to unfollow user')
     } finally {
@@ -234,8 +211,7 @@
         const response = await micropostApi.remove(micropostId)
         if (response.flash) {
           toast.success(response.flash[1])
-          await fetchUserMicroposts()
-          user.value.micropostCount--
+          await setWall()
         }
       } catch (error) {
         toast.error('Failed to delete micropost')
@@ -244,9 +220,9 @@
   }
   
   watch(() => route.params.id, (newId) => {
-    userId.value = newId
-    fetchUserProfile()
+    userId.value = newId as string
+    setWall()
   })
-  watch(() => page.value, fetchUserMicroposts)
+  watch(() => page.value, setWall)
   </script>
   

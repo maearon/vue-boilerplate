@@ -15,9 +15,11 @@ export interface ListResponse<User> {
 
 export interface User {
   readonly id: string
-  name: string
+  name?: string
+  displayName: string
   gravatar_id: string
   size: number
+  avatarUrl?: string
 }
 
 export interface CreateParams {
