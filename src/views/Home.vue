@@ -7,7 +7,7 @@
     <template v-else-if="sessionStore.error">
       <h2>{{ sessionStore.error }}</h2>
     </template>
-    <template v-else-if="sessionStore.user.email">
+    <template v-else-if="sessionStore.user && sessionStore.user.email">
       <v-row>
         <v-col cols="12" md="4">
           <v-card class="mb-4">
@@ -192,8 +192,7 @@ const submitting = ref(false)
 
 const isLoggedIn = computed(() => sessionStore.loggedIn)
 const user = computed(() => sessionStore.user)
-const userEmail = computed(() => user.value.email)
-const userError = computed(() => sessionStore.error)
+const userId = computed(() => sessionStore.user ? sessionStore.user.id : null)
 
 const setFeeds = async () => {
   try {
@@ -215,17 +214,30 @@ const setFeeds = async () => {
 
 onMounted(async () => {
   try {
-    await sessionStore.fetchUser()
+    // Only try to fetch user if there's a token
+    if (localStorage.getItem('token') || sessionStorage.getItem('token')) {
+      await sessionStore.fetchUser();
+    }
   } catch (error) {
-    toast.error('Failed to fetch user')
+    console.error('Error fetching user:', error);
+    // Don't show error toast for auth errors
   } finally {
-    await setFeeds()
-    loading.value = false
+    // Only fetch feeds if logged in
+    if (sessionStore.loggedIn) {
+      await setFeeds();
+    }
+    loading.value = false;
   }
-})
+});
 
 watch(() => page.value, setFeeds)
-watch(isLoggedIn, setFeeds)
+watch(isLoggedIn, () => {
+  if (isLoggedIn.value) {
+    setFeeds();
+  } else {
+    feedItems.value = [];
+  }
+})
 
 const handlePageChange = (newPage: number) => {
   page.value = newPage

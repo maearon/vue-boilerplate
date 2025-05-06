@@ -1,87 +1,52 @@
-// import axios from 'axios'
+import axios, { type AxiosResponse } from "axios"
 
-// let BASE_URL = ''
-// if (process.env.NODE_ENV === 'development') {
-//   BASE_URL = 'http://localhost:3001/api'
-// } else {
-//   BASE_URL = 'https://railstutorialapi.onrender.com/api'
-// }
-
-// axios.defaults.xsrfCookieName = 'CSRF-TOKEN';
-
-// axios.defaults.xsrfHeaderName = 'X-CSRF-Token';
-
-// axios.defaults.withCredentials = true;
-
-// export default class API {
-//     constructor(lang = 'EN') {
-//         this.lang = lang
-//     }
-//     getHttpClient(baseURL = `${BASE_URL}`) {
-//         var headers = {
-//             'Content-Type': 'application/json',
-//             'Accept': 'application/json',
-//             'x-lang': this.lang
-//         }
-//         this.client = axios.create({
-//             baseURL: baseURL,
-//             headers: headers
-//         })
-//         return this.client
-//     }
-// }
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-
-let BASE_URL = ''
-if (process.env.NODE_ENV === 'development') {
-  BASE_URL = 'https://ruby-rails-boilerplate-3s9t.onrender.com/api'
+let BASE_URL = ""
+if (process.env.NODE_ENV === "development") {
+  BASE_URL = "https://ruby-rails-boilerplate-3s9t.onrender.com/api"
 } else {
-  BASE_URL = 'https://ruby-rails-boilerplate-3s9t.onrender.com/api'
+  BASE_URL = "https://ruby-rails-boilerplate-3s9t.onrender.com/api"
 }
 
-axios.defaults.xsrfCookieName = 'CSRF-TOKEN';
+axios.defaults.xsrfCookieName = "CSRF-TOKEN"
 
-axios.defaults.xsrfHeaderName = 'X-CSRF-Token';
+axios.defaults.xsrfHeaderName = "X-CSRF-Token"
 
-axios.defaults.withCredentials = true;
+axios.defaults.withCredentials = true
 
 const API = axios.create({
   baseURL: BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'x-lang': 'EN'
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "x-lang": "EN",
   },
-});
+})
 
 API.interceptors.request.use(
-  function (config: any) {
-    if (
-      localStorage.getItem('token') && localStorage.getItem('token') !== 'undefined'
-    ) 
-    {
-      config.headers.Authorization = `Bearer ${localStorage.getItem('token')} ${localStorage.getItem('remember_token')}`
+  (config: any) => {
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token")
+    const rememberToken = localStorage.getItem("remember_token") || sessionStorage.getItem("remember_token")
+
+    if (token && token !== "undefined") {
+      config.headers.Authorization = `Bearer ${token} ${rememberToken || ""}`
     }
-    else if (
-      sessionStorage.getItem('token') && sessionStorage.getItem('token') !== 'undefined'
-    ) 
-    {
-      config.headers.Authorization = `Bearer ${sessionStorage.getItem('token')} ${sessionStorage.getItem('remember_token')}`
-    }
-    return config;
+    return config
   },
-  function (error) {
-    return Promise.reject(error);
-  }
-);
+  (error) => Promise.reject(error),
+)
 
 API.interceptors.response.use(
-  function (response: AxiosResponse) {
-    return response.data;
+  (response: AxiosResponse) => response.data,
+  (error) => {
+    // For 401 errors when accessing /sessions endpoint, don't reject the promise
+    // This prevents the error from propagating when checking auth status
+    if (error.response && error.response.status === 401 && error.config.url.includes("/sessions")) {
+      console.log("Handling 401 error silently for auth check")
+      // Return an empty successful response instead of rejecting
+      return Promise.resolve({ user: null, loggedIn: false })
+    }
+    return Promise.reject(error)
   },
-  function (error) {
-    return Promise.reject(error);
-  }
-);
+)
 
-export default API;
+export default API
