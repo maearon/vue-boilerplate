@@ -196,7 +196,7 @@ const followUser = async () => {
   followLoading.value = true
   try {
     const response = await relationshipApi.create({ FollowedId: userId.value });
-    if (response.message) {
+    if (response.follow) {
       await setWall()
     }
   } catch (err) {
@@ -210,7 +210,7 @@ const unfollowUser = async () => {
   followLoading.value = true
   try {
     const response = await relationshipApi.destroy(userId.value);
-    if (response === "" || response === undefined) {
+    if (response.unfollow) {
       await setWall()
     }
   } catch (err) {
