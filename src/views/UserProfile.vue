@@ -173,17 +173,23 @@ const setWall = async () => {
       totalCount.value = response.total_count
       console.log('[setWall] user:', response.user)
       console.log('[setWall] microposts:', response.microposts.length)
+      loading.value = false
+      followLoading.value = false
     } else {
       microposts.value = []
       totalCount.value = 0
       console.warn('[setWall] No microposts found in response.')
+      loading.value = false
+      followLoading.value = false
     }
   } catch (err) {
     error.value = 'Failed to load microposts'
     console.error('[setWall] Error loading user/microposts:', err)
     toast.error('Failed to load microposts')
-  } finally {
     loading.value = false
+    followLoading.value = false
+  } finally {
+    
     console.log('[setWall] end')
   }
 }
@@ -202,7 +208,7 @@ const followUser = async () => {
   } catch (err) {
     toast.error('Failed to follow user')
   } finally {
-    followLoading.value = false
+    
   }
 }
 
@@ -216,7 +222,7 @@ const unfollowUser = async () => {
   } catch (err) {
     toast.error('Failed to unfollow user')
   } finally {
-    followLoading.value = false
+    
   }
 }
 
