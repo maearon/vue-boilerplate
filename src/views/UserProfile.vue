@@ -195,7 +195,7 @@ const handlePageChange = (newPage: number) => {
 const followUser = async () => {
   followLoading.value = true
   try {
-    const response = await relationshipApi.create({ FollowedId: userId.value });
+    const response = await relationshipApi.create({ followed_id: userId.value });
     if (response.follow) {
       await setWall()
     }
